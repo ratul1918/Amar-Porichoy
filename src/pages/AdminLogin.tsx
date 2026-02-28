@@ -7,13 +7,13 @@ import { motion } from 'motion/react';
 export function AdminLogin() {
   const navigate = useNavigate();
   const { login, isAuthenticated, isLoading, error: authError } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [showCredentials, setShowCredentials] = useState(false);
-  
+
   const emailFieldId = useId();
   const pwdFieldId = useId();
 
@@ -121,7 +121,7 @@ export function AdminLogin() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-2">
-            {/* Email Field */}}
+            {/* Email Field */}
             <div>
               <label htmlFor={emailFieldId} className="block text-xs font-semibold text-gray-700 mb-1">
                 Email Address
