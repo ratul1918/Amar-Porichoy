@@ -1,0 +1,201 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Porichoy — Docker Compose
+# Services: api | postgres | redis | minio | pgadmin (dev only)
+# ─────────────────────────────────────────────────────────────────────────────
+
+networks:
+  porichoy-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  pgadmin_data:
+
+services:
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: porichoy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-porichoy}
+      POSTGRES_USER: ${POSTGRES_USER:-porichoy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_INITDB_ARGS: "--locale=en_US.UTF-8 --encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - porichoy-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-porichoy} -d ${POSTGRES_DB:-porichoy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Redis 7 ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: porichoy-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - porichoy-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── MinIO (S3-compatible object storage) ──────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: porichoy-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID is required}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY is required}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"      # S3 API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Web console
+    networks:
+      - porichoy-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── MinIO bucket initialiser (runs once then exits) ───────────────────────
+  minio-init:
+    image: minio/mc:latest
+    container_name: porichoy-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 $${MC_ACCESS_KEY} $${MC_SECRET_KEY} &&
+        mc mb --ignore-existing local/$${BUCKET_DOCUMENTS} &&
+        mc mb --ignore-existing local/$${BUCKET_PHOTOS} &&
+        mc anonymous set none local/$${BUCKET_DOCUMENTS} &&
+        mc anonymous set none local/$${BUCKET_PHOTOS} &&
+        echo 'MinIO buckets ready.'
+      "
+    environment:
+      MC_ACCESS_KEY: ${S3_ACCESS_KEY_ID}
+      MC_SECRET_KEY: ${S3_SECRET_ACCESS_KEY}
+      BUCKET_DOCUMENTS: ${S3_BUCKET_DOCUMENTS:-porichoy-documents}
+      BUCKET_PHOTOS: ${S3_BUCKET_PHOTOS:-porichoy-photos}
+    networks:
+      - porichoy-net
+    restart: "no"
+
+  # ── Porichoy API ──────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: porichoy-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Override DB URL to use internal Docker network hostname
+      DATABASE_URL: postgresql://${POSTGRES_USER:-porichoy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-porichoy}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      S3_ENDPOINT: http://minio:9000
+    ports:
+      - "${PORT:-3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - porichoy-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Resource limits (tune for your VM/K8s node)
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ── Prisma DB migrations (runs once per deploy) ───────────────────────────
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder   # has dev deps + source for prisma migrate
+    container_name: porichoy-migrate
+    command: ["npx", "prisma", "migrate", "deploy"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-porichoy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-porichoy}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - porichoy-net
+    restart: "no"
+
+  # ── pgAdmin 4 (dev/ops tool — disable in production) ─────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: porichoy-pgadmin
+    restart: unless-stopped
+    profiles:
+      - dev         # Only starts with: docker compose --profile dev up
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@porichoy.gov.bd}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-changeme}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - porichoy-net
