@@ -1,25 +1,25 @@
 import { Shield, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { LanguageToggle } from './LanguageToggle';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage, TranslationKey } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useCallback } from 'react';
 
-type NavItem = { path: string; labelKey: string };
+type NavItem = { path: string; labelKey: TranslationKey };
 
 const PUBLIC_NAV: NavItem[] = [
-  { path: '/portals',      labelKey: 'nav.portals' },
-  { path: '/about',        labelKey: 'nav.about' },
+  { path: '/portals', labelKey: 'nav.portals' },
+  { path: '/about', labelKey: 'nav.about' },
   { path: '/how-it-works', labelKey: 'nav.howItWorks' },
-  { path: '/faq',          labelKey: 'nav.faq' },
+  { path: '/faq', labelKey: 'nav.faq' },
 ];
 
 const PRIVATE_NAV: NavItem[] = [
   { path: '/dashboard', labelKey: 'nav.dashboard' },
-  { path: '/services',  labelKey: 'nav.services' },
-  { path: '/portals',   labelKey: 'nav.portals' },
-  { path: '/tracking',  labelKey: 'nav.tracking' },
+  { path: '/services', labelKey: 'nav.services' },
+  { path: '/portals', labelKey: 'nav.portals' },
+  { path: '/tracking', labelKey: 'nav.tracking' },
 ];
 
 export function Header() {
@@ -85,11 +85,10 @@ export function Header() {
                 key={item.path}
                 to={item.path}
                 aria-current={isCurrentPage(item.path) ? 'page' : undefined}
-                className={`text-sm transition-colors ${language === 'bn' ? 'font-bangla' : ''} ${
-                  isCurrentPage(item.path)
+                className={`text-sm transition-colors ${language === 'bn' ? 'font-bangla' : ''} ${isCurrentPage(item.path)
                     ? 'text-[rgb(var(--color-primary))] font-medium'
                     : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-primary))]'
-                }`}
+                  }`}
               >
                 {t(item.labelKey)}
               </Link>
@@ -152,11 +151,10 @@ export function Header() {
                   key={item.path}
                   to={item.path}
                   aria-current={isCurrentPage(item.path) ? 'page' : undefined}
-                  className={`block px-4 py-3 rounded-lg text-sm transition-colors ${language === 'bn' ? 'font-bangla' : ''} ${
-                    isCurrentPage(item.path)
+                  className={`block px-4 py-3 rounded-lg text-sm transition-colors ${language === 'bn' ? 'font-bangla' : ''} ${isCurrentPage(item.path)
                       ? 'bg-[rgb(var(--color-accent-light))] text-[rgb(var(--color-primary))] font-medium'
                       : 'hover:bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text-secondary))]'
-                  }`}
+                    }`}
                 >
                   {t(item.labelKey)}
                 </Link>

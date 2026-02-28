@@ -28,7 +28,10 @@ interface LanguageContextType {
    * @example t('nav.dashboard')  →  "ড্যাশবোর্ড"
    * @example t('login.attempts.warning', { remaining: 3 })
    */
-  t: (key: TranslationKey, interpolations?: Record<string, string | number>) => string;
+  t: {
+    (key: TranslationKey, interpolations?: Record<string, string | number>): string;
+    (bn: string, en: string): string;
+  };
   /**
    * Legacy API: directly provide both language strings.
    * Use during migration until all components use `t(key)`.
@@ -57,7 +60,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const next: Language = prev === 'bn' ? 'en' : 'bn';
       try {
         localStorage.setItem(LANG_STORAGE_KEY, next);
-      } catch {/* ignore */}
+      } catch {/* ignore */ }
       return next;
     });
   }, []);
@@ -68,8 +71,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const t = useCallback(
-    (key: TranslationKey, interpolations?: Record<string, string | number>) =>
-      resolveTranslation(language, key, interpolations),
+    (keyOrBn: TranslationKey | string, interpolationsOrEn?: Record<string, string | number> | string) => {
+      if (typeof interpolationsOrEn === 'string') {
+        return language === 'bn' ? keyOrBn : interpolationsOrEn;
+      }
+      return resolveTranslation(language, keyOrBn as TranslationKey, interpolationsOrEn);
+    },
     [language]
   );
 
