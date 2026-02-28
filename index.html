@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ── Primary Meta ──────────────────────────────────────────────────── -->
+    <title>Porichoy — National Digital Identity Platform</title>
+    <meta name="description" content="Porichoy (পরিচয়) is Bangladesh's secure National Digital Identity Platform for citizens to verify identity and access government services." />
+    <meta name="application-name" content="Porichoy" />
+    <meta name="keywords" content="Bangladesh, national ID, NID, digital identity, government services, birth certificate" />
+
+    <!-- Prevent indexing of the SPA shell — individual pages control this via server-sent headers in production -->
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- ── Security Headers (Meta Equivalents) ───────────────────────────── -->
+    <!--
+      IMPORTANT: The following security controls MUST be enforced as HTTP
+      response headers in production (nginx / CDN / reverse-proxy). The meta-
+      tag equivalents below are a fallback for local development only.
+
+      Required production headers:
+        Content-Security-Policy: see csp.example below
+        Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+        X-Content-Type-Options: nosniff
+        X-Frame-Options: DENY
+        Referrer-Policy: strict-origin-when-cross-origin
+        Permissions-Policy: camera=(), microphone=(), geolocation=()
+    -->
+
+    <!-- Referrer Policy — prevents leaking URL fragments to third parties -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!--
+      Content Security Policy (development-friendly; tighten for production):
+      - 'unsafe-inline' for styles is required by Tailwind/CSS-in-JS until nonces are added
+      - 'unsafe-eval' is required by Vite HMR in development ONLY; remove in prod
+      - fonts.googleapis.com / fonts.gstatic.com for Google Fonts
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https:;
+        connect-src 'self';
+        frame-ancestors 'none';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+      "
+    />
+
+    <!-- ── Branding ───────────────────────────────────────────────────────── -->
+    <meta name="theme-color" content="#006A4E" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- ── Open Graph (for share previews) ──────────────────────────────── -->
+    <meta property="og:title" content="Porichoy — National Digital Identity Platform" />
+    <meta property="og:description" content="Bangladesh's secure digital identity portal for citizens." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="bn_BD" />
+    <meta property="og:locale:alternate" content="en_US" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
