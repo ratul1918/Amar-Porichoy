@@ -1,0 +1,549 @@
+// ============================================================
+// Porichoy — National Digital Identity Platform
+// Full PostgreSQL Schema via Prisma ORM
+// Optimised for millions of users + government compliance
+// ============================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "fullTextSearch"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto, uuid_ossp, pg_trgm, btree_gin]
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+  PENDING_VERIFICATION
+  DEACTIVATED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  AWAITING_DOCUMENTS
+  PROCESSING
+  APPROVED
+  REJECTED
+  CANCELLED
+  DELIVERED
+}
+
+enum DocumentType {
+  NID_CARD
+  BIRTH_CERTIFICATE
+  PASSPORT
+  PHOTO
+  SUPPORTING_DOCUMENT
+  AFFIDAVIT
+  MARRIAGE_CERTIFICATE
+  DEED_DOCUMENT
+  OTHER
+}
+
+enum DocumentScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+  ERROR
+}
+
+enum AuditLevel {
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_CHANGED
+  TOKEN_REFRESHED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  CITIZEN_CREATED
+  CITIZEN_UPDATED
+  CITIZEN_VIEWED
+  NID_VERIFIED
+  APPLICATION_CREATED
+  APPLICATION_SUBMITTED
+  APPLICATION_UPDATED
+  APPLICATION_STATUS_CHANGED
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  DOCUMENT_VIEWED
+  ROLE_ASSIGNED
+  ROLE_REVOKED
+  ADMIN_ACTION
+  DATA_EXPORTED
+  SYSTEM_EVENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum RoleName {
+  CITIZEN
+  AGENT
+  OFFICER
+  SUPERVISOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ─────────────────────────────────────────────
+// ROLES & PERMISSIONS
+// ─────────────────────────────────────────────
+
+/// System roles — each has a fixed permission set stored as JSON array
+model Role {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        RoleName @unique
+  displayName String   @map("display_name") @db.VarChar(100)
+  description String?  @db.Text
+  permissions Json     @default("[]") // string[] — e.g. ["view:dashboard","manage:applications"]
+  isSystem    Boolean  @default(true) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+/// Many-to-many: users ↔ roles
+model UserRole {
+  userId     String   @map("user_id") @db.Uuid
+  roleId     String   @map("role_id") @db.Uuid
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz
+  assignedBy String?  @map("assigned_by") @db.Uuid // user_id of admin who assigned
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@id([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+// ─────────────────────────────────────────────
+// USERS (Account / Authentication)
+// ─────────────────────────────────────────────
+
+/// Login accounts. Citizen identity data is in the `citizens` table.
+/// One user can have exactly one citizen profile.
+model User {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Either NID or birth registration number — the primary login identifier
+  identifier     String     @unique @db.VarChar(20)
+  identifierType String     @map("identifier_type") @db.VarChar(20) // 'nid' | 'birth_reg'
+  phone          String     @unique @db.VarChar(20)
+  email          String?    @unique @db.VarChar(255)
+  /// bcrypt cost-10 hash stored as varchar(72)
+  passwordHash   String     @map("password_hash") @db.VarChar(72)
+  status         UserStatus @default(PENDING_VERIFICATION)
+  /// Progressive lockout — incremented on each auth failure
+  failedAttempts Int        @default(0) @map("failed_attempts")
+  lockedUntil    DateTime?  @map("locked_until") @db.Timestamptz
+  lastLoginAt    DateTime?  @map("last_login_at") @db.Timestamptz
+  lastLoginIp    String?    @map("last_login_ip") @db.Inet
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz
+  phoneVerifiedAt DateTime? @map("phone_verified_at") @db.Timestamptz
+  /// Must be changed on first login (for officer accounts created by admin)
+  mustChangePassword Boolean @default(false) @map("must_change_password")
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?  @map("deleted_at") @db.Timestamptz // soft delete
+
+  citizen       Citizen?
+  userRoles     UserRole[]
+  sessions      Session[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@index([identifier])
+  @@index([phone])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// SESSIONS
+// ─────────────────────────────────────────────
+
+/// Server-tracked sessions. Access tokens are stateless JWTs but sessions
+/// here allow instant revocation (e.g. logout-all-devices).
+model Session {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  /// SHA-256 of the current refresh token bound to this session
+  tokenFamily String    @unique @map("token_family") @db.VarChar(64) // UUID v4 family
+  ipAddress   String    @map("ip_address") @db.Inet
+  userAgent   String    @map("user_agent") @db.Text
+  deviceInfo  Json?     @map("device_info") // parsed UA fields
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz
+  lastActiveAt DateTime @default(now()) @map("last_active_at") @db.Timestamptz
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz
+  revokedReason String? @map("revoked_reason") @db.VarChar(100)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+  @@index([tokenFamily])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Refresh tokens with rotation + family-based reuse detection
+model RefreshToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  sessionId  String    @map("session_id") @db.Uuid
+  /// SHA-256 hash of the raw token (never store plain token)
+  tokenHash  String    @unique @map("token_hash") @db.VarChar(64)
+  family     String    @db.VarChar(64) // ties to session.tokenFamily
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
+  usedAt     DateTime? @map("used_at") @db.Timestamptz
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz
+  replacedBy String?   @map("replaced_by") @db.Uuid // id of the new token
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([family])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────
+// CITIZENS (National Identity Data)
+// ─────────────────────────────────────────────
+
+/// Immutable (append-only policy) citizen identity records.
+/// Changes go through the CitizenUpdate flow with officer approval.
+model Citizen {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String             @unique @map("user_id") @db.Uuid
+  /// National ID Number — 10 or 17 digits
+  nidNumber          String?            @unique @map("nid_number") @db.VarChar(17)
+  /// Birth Registration Number — 17 digits
+  birthRegNumber     String?            @unique @map("birth_reg_number") @db.VarChar(17)
+  nameBn             String             @map("name_bn") @db.VarChar(200)
+  nameEn             String             @map("name_en") @db.VarChar(200)
+  fatherNameBn       String             @map("father_name_bn") @db.VarChar(200)
+  fatherNameEn       String?            @map("father_name_en") @db.VarChar(200)
+  motherNameBn       String             @map("mother_name_bn") @db.VarChar(200)
+  motherNameEn       String?            @map("mother_name_en") @db.VarChar(200)
+  spouseNameBn       String?            @map("spouse_name_bn") @db.VarChar(200)
+  dateOfBirth        DateTime           @map("date_of_birth") @db.Date
+  gender             Gender
+  bloodGroup         String?            @map("blood_group") @db.VarChar(5)
+  /// Present address — stored as structured JSON
+  presentAddress     Json               @map("present_address")
+  /// Permanent address
+  permanentAddress   Json               @map("permanent_address")
+  /// Encrypted photo URL in object storage
+  photoUrl           String?            @map("photo_url") @db.Text
+  verificationStatus VerificationStatus @default(UNVERIFIED) @map("verification_status")
+  verifiedAt         DateTime?          @map("verified_at") @db.Timestamptz
+  verifiedBy         String?            @map("verified_by") @db.Uuid // officer user_id
+  rejectionReason    String?            @map("rejection_reason") @db.Text
+  /// Data classification level (PUBLIC, RESTRICTED, CONFIDENTIAL, SECRET)
+  dataClass          String             @default("RESTRICTED") @map("data_class") @db.VarChar(20)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  nidVerifications  NidVerification[]
+  applications      Application[]
+  documents         Document[]
+
+  @@index([nidNumber])
+  @@index([birthRegNumber])
+  @@index([verificationStatus])
+  @@index([dateOfBirth])
+  // GIN trigram indexes for full-text search (requires pg_trgm extension)
+  @@index([nameBn(ops: raw("gin_trgm_ops"))], type: Gin, map: "gin_citizen_name_bn")
+  @@index([nameEn(ops: raw("gin_trgm_ops"))], type: Gin, map: "gin_citizen_name_en")
+  @@map("citizens")
+}
+
+// ─────────────────────────────────────────────
+// NID VERIFICATION
+// ─────────────────────────────────────────────
+
+/// Every attempt to verify a NID against backend registrar systems
+model NidVerification {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  citizenId        String             @map("citizen_id") @db.Uuid
+  nidNumber        String             @map("nid_number") @db.VarChar(17)
+  status           VerificationStatus @default(PENDING)
+  /// Raw response from NID registrar API — encrypted at rest via pgcrypto
+  providerResponse Json?              @map("provider_response")
+  providerName     String             @default("EC_NID") @map("provider_name") @db.VarChar(50)
+  requestedAt      DateTime           @default(now()) @map("requested_at") @db.Timestamptz
+  respondedAt      DateTime?          @map("responded_at") @db.Timestamptz
+  errorCode        String?            @map("error_code") @db.VarChar(50)
+  errorMessage     String?            @map("error_message") @db.Text
+  verifiedBy       String?            @map("verified_by") @db.Uuid
+  retryCount       Int                @default(0) @map("retry_count")
+
+  citizen Citizen @relation(fields: [citizenId], references: [id], onDelete: Cascade)
+
+  @@index([citizenId])
+  @@index([nidNumber])
+  @@index([status])
+  @@map("nid_verifications")
+}
+
+// ─────────────────────────────────────────────
+// SERVICE CATALOG
+// ─────────────────────────────────────────────
+
+/// Master list of government services the platform offers
+model ServiceCatalog {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code               String   @unique @db.VarChar(50) // e.g. 'PASSPORT_NEW', 'NID_REISSUE'
+  nameBn             String   @map("name_bn") @db.VarChar(200)
+  nameEn             String   @map("name_en") @db.VarChar(200)
+  descriptionBn      String?  @map("description_bn") @db.Text
+  descriptionEn      String?  @map("description_en") @db.Text
+  category           String   @db.VarChar(100)
+  /// Zod/JSON schema for the application form
+  formSchema         Json     @map("form_schema")
+  /// List of required document types
+  requiredDocuments  Json     @default("[]") @map("required_documents")
+  processingDays     Int      @default(30) @map("processing_days")
+  fees               Decimal  @default(0) @db.Decimal(10, 2)
+  currency           String   @default("BDT") @db.VarChar(5)
+  isActive           Boolean  @default(true) @map("is_active")
+  requiresVerification Boolean @default(true) @map("requires_verification")
+  minimumAge         Int?     @map("minimum_age")
+  sortOrder          Int      @default(0) @map("sort_order")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  applications Application[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("service_catalog")
+}
+
+// ─────────────────────────────────────────────
+// APPLICATIONS
+// ─────────────────────────────────────────────
+
+model Application {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  citizenId      String            @map("citizen_id") @db.Uuid
+  serviceId      String            @map("service_id") @db.Uuid
+  /// Human-readable tracking number: YYYY-CODE-XXXXXXXX
+  trackingNumber String            @unique @map("tracking_number") @db.VarChar(30)
+  status         ApplicationStatus @default(DRAFT)
+  /// Form responses — encrypted with application-level key
+  formData       Json              @map("form_data")
+  priority       Int               @default(0) // 0=normal, 1=urgent, 2=critical
+  submittedAt    DateTime?         @map("submitted_at") @db.Timestamptz
+  processingStartedAt DateTime?    @map("processing_started_at") @db.Timestamptz
+  processedAt    DateTime?         @map("processed_at") @db.Timestamptz
+  processedBy    String?           @map("processed_by") @db.Uuid
+  approvedAt     DateTime?         @map("approved_at") @db.Timestamptz
+  approvedBy     String?           @map("approved_by") @db.Uuid
+  deliveredAt    DateTime?         @map("delivered_at") @db.Timestamptz
+  /// Rejection or approval notes from officer
+  officerNotes   String?           @map("officer_notes") @db.Text
+  decisionReason String?           @map("decision_reason") @db.Text
+  /// SLA deadline — computed from service.processingDays
+  dueDate        DateTime?         @map("due_date") @db.Date
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  citizen       Citizen              @relation(fields: [citizenId], references: [id], onDelete: Restrict)
+  service       ServiceCatalog       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  documents     Document[]
+  statusHistory ApplicationStatusHistory[]
+
+  @@index([citizenId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([trackingNumber])
+  @@index([submittedAt])
+  @@index([dueDate])
+  @@index([processedBy])
+  @@map("applications")
+}
+
+/// Immutable status timeline — every status change is recorded
+model ApplicationStatusHistory {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId String            @map("application_id") @db.Uuid
+  fromStatus    ApplicationStatus? @map("from_status")
+  toStatus      ApplicationStatus @map("to_status")
+  changedBy     String?           @map("changed_by") @db.Uuid
+  changedAt     DateTime          @default(now()) @map("changed_at") @db.Timestamptz
+  reason        String?           @db.Text
+  metadata      Json?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([changedAt])
+  @@map("application_status_history")
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENTS
+// ─────────────────────────────────────────────
+
+model Document {
+  id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  citizenId     String             @map("citizen_id") @db.Uuid
+  applicationId String?            @map("application_id") @db.Uuid
+  type          DocumentType
+  originalName  String             @map("original_name") @db.VarChar(255)
+  /// Path in object storage (MinIO/S3). Never expose directly — always pre-sign.
+  storagePath   String             @map("storage_path") @db.Text
+  storageBucket String             @map("storage_bucket") @db.VarChar(100)
+  mimeType      String             @map("mime_type") @db.VarChar(100)
+  fileSizeBytes Int                @map("file_size_bytes")
+  /// SHA-256 of the raw file — integrity verification
+  checksum      String             @db.VarChar(64)
+  uploadedBy    String             @map("uploaded_by") @db.Uuid
+  uploadedAt    DateTime           @default(now()) @map("uploaded_at") @db.Timestamptz
+  expiresAt     DateTime?          @map("expires_at") @db.Date
+  /// ClamAV scan result
+  scanStatus    DocumentScanStatus @default(PENDING) @map("scan_status")
+  scannedAt     DateTime?          @map("scanned_at") @db.Timestamptz
+  isVerified    Boolean            @default(false) @map("is_verified")
+  verifiedBy    String?            @map("verified_by") @db.Uuid
+  verifiedAt    DateTime?          @map("verified_at") @db.Timestamptz
+  isDeleted     Boolean            @default(false) @map("is_deleted")
+  deletedAt     DateTime?          @map("deleted_at") @db.Timestamptz
+  deletedBy     String?            @map("deleted_by") @db.Uuid
+  metadata      Json?
+
+  citizen     Citizen      @relation(fields: [citizenId], references: [id], onDelete: Restrict)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([citizenId])
+  @@index([applicationId])
+  @@index([type])
+  @@index([scanStatus])
+  @@index([uploadedAt])
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────────
+
+/// Append-only audit trail. Partitioned by month (see migration notes).
+/// No updates or deletes are permitted on this table via application code.
+model AuditLog {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String?     @map("user_id") @db.Uuid
+  action     AuditAction
+  level      AuditLevel  @default(INFO)
+  entityType String?     @map("entity_type") @db.VarChar(50) // 'User' | 'Citizen' | 'Application' ...
+  entityId   String?     @map("entity_id") @db.Uuid
+  /// Snapshot of state before the change (GDPR: excluded from personal data export)
+  oldData    Json?       @map("old_data")
+  /// Snapshot of state after the change
+  newData    Json?       @map("new_data")
+  ipAddress  String?     @map("ip_address") @db.Inet
+  userAgent  String?     @map("user_agent") @db.Text
+  requestId  String?     @map("request_id") @db.Uuid // correlates all logs per HTTP request
+  /// Additional structured context
+  metadata   Json?
+  timestamp  DateTime    @default(now()) @db.Timestamptz
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+  @@index([level])
+  @@index([requestId])
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────
+// OTP / VERIFICATION CODES
+// ─────────────────────────────────────────────
+
+/// Short-lived OTP codes — for phone/email verification and 2FA
+model VerificationCode {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  /// 'phone_verification' | 'email_verification' | '2fa' | 'password_reset'
+  purpose    String   @db.VarChar(30)
+  /// SHA-256 of the raw 6-digit OTP — never store plain OTP
+  codeHash   String   @map("code_hash") @db.VarChar(64)
+  target     String   @db.VarChar(255) // phone or email the code was sent to
+  attempts   Int      @default(0)      // increment on wrong code; block at 3
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz
+  usedAt     DateTime? @map("used_at") @db.Timestamptz
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("verification_codes")
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  type        String   @db.VarChar(50) // 'EMAIL' | 'SMS' | 'PUSH'
+  template    String   @db.VarChar(100)
+  recipient   String   @db.VarChar(255)
+  subject     String?  @db.VarChar(500)
+  bodyBn      String?  @map("body_bn") @db.Text
+  bodyEn      String?  @map("body_en") @db.Text
+  status      String   @default("QUEUED") @db.VarChar(20)
+  sentAt      DateTime? @map("sent_at") @db.Timestamptz
+  failureReason String? @map("failure_reason") @db.Text
+  retryCount  Int      @default(0) @map("retry_count")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("notifications")
+}
