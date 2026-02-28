@@ -51,10 +51,7 @@ export interface ApplicationStep {
   readonly completedAt?: string;     // ISO 8601
 }
 
-export interface BilingualText {
-  readonly bn: string;
-  readonly en: string;
-}
+import { BilingualText } from './api';
 
 export interface GovernmentService {
   readonly id: string;
