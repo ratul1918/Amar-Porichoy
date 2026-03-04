@@ -70,7 +70,7 @@ export function About() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[rgb(var(--color-secondary))] rounded-full blur-3xl"></div>
@@ -119,7 +119,7 @@ export function About() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${item.gradient} flex items-center justify-center mx-auto mb-6`}>
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mx-auto mb-6`}>
                   <item.icon className="w-10 h-10 text-white" />
                 </div>
                 <h3 className={`text-2xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -135,7 +135,7 @@ export function About() {
       </div>
 
       {/* Achievements */}
-      <div className="py-20 bg-linear-to-br from-gray-50 via-white to-emerald-50">
+      <div className="py-20 bg-gradient-to-br from-gray-50 via-white to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -163,7 +163,7 @@ export function About() {
                 className="bg-white rounded-2xl p-8 text-center"
                 style={{ boxShadow: 'var(--shadow-lg)' }}
               >
-                <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${item.color} flex items-center justify-center mx-auto mb-6`}>
+                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-6`}>
                   <item.icon className="w-8 h-8 text-white" />
                 </div>
                 <div className={`text-4xl font-bold text-[rgb(var(--color-primary))] mb-2 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -214,7 +214,7 @@ export function About() {
       </div>
 
       {/* Security & Privacy */}
-      <div className="py-20 bg-linear-to-br from-gray-50 via-white to-emerald-50">
+      <div className="py-20 bg-gradient-to-br from-gray-50 via-white to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -241,7 +241,7 @@ export function About() {
               className="bg-white rounded-2xl p-8"
               style={{ boxShadow: 'var(--shadow-lg)' }}
             >
-              <div className="w-16 h-16 rounded-xl bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6">
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -262,7 +262,7 @@ export function About() {
               className="bg-white rounded-2xl p-8"
               style={{ boxShadow: 'var(--shadow-lg)' }}
             >
-              <div className="w-16 h-16 rounded-xl bg-linear-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mb-6">
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
