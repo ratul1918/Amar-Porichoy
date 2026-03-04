@@ -103,7 +103,7 @@ export function HowItWorks() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-[rgb(var(--color-secondary))] rounded-full blur-3xl"></div>
@@ -147,7 +147,7 @@ export function HowItWorks() {
                 {/* Icon Side */}
                 <div className="flex-1 flex justify-center">
                   <div className="relative">
-                    <div className={`w-48 h-48 rounded-3xl bg-linear-to-br ${step.gradient} flex items-center justify-center`}
+                    <div className={`w-48 h-48 rounded-3xl bg-gradient-to-br ${step.gradient} flex items-center justify-center`}
                       style={{ boxShadow: 'var(--shadow-xl)' }}
                     >
                       <step.icon className="w-24 h-24 text-white" />
@@ -173,7 +173,7 @@ export function HowItWorks() {
                   <div className="space-y-3">
                     {step.details.map((detail, idx) => (
                       <div key={idx} className="flex items-start gap-3">
-                        <div className={`w-6 h-6 rounded-full bg-linear-to-br ${step.gradient} flex items-center justify-center shrink-0 mt-0.5`}>
+                        <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${step.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                           <CheckCircle2 className="w-4 h-4 text-white" />
                         </div>
                         <span className={`text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -190,7 +190,7 @@ export function HowItWorks() {
       </div>
 
       {/* Benefits Section */}
-      <div className="py-20 bg-linear-to-br from-gray-50 via-white to-emerald-50">
+      <div className="py-20 bg-gradient-to-br from-gray-50 via-white to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -218,7 +218,7 @@ export function HowItWorks() {
                 className="bg-white rounded-2xl p-8"
                 style={{ boxShadow: 'var(--shadow-lg)' }}
               >
-                <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${benefit.color} flex items-center justify-center mb-6`}>
+                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${benefit.color} flex items-center justify-center mb-6`}>
                   <benefit.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className={`text-2xl mb-3 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -251,7 +251,7 @@ export function HowItWorks() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-10 py-5 rounded-xl bg-linear-to-r from-[rgb(var(--color-primary))] to-emerald-600 text-white text-lg font-semibold inline-flex items-center gap-3 ${language === 'bn' ? 'font-bangla' : ''}`}
+                className={`px-10 py-5 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary))] to-emerald-600 text-white text-lg font-semibold inline-flex items-center gap-3 ${language === 'bn' ? 'font-bangla' : ''}`}
                 style={{ boxShadow: 'var(--shadow-xl)' }}
               >
                 {t('এখনই শুরু করুন', 'Get Started Now')}
