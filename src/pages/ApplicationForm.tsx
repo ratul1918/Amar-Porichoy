@@ -232,7 +232,7 @@ export function ApplicationForm() {
 
             <div className="mt-6 p-4 rounded-xl bg-[rgb(var(--color-accent-light))] border border-[rgb(var(--color-accent))]">
               <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-[rgb(var(--color-accent))] shrink-0" />
+                <AlertCircle className="w-5 h-5 text-[rgb(var(--color-accent))] flex-shrink-0" />
                 <p className={`text-sm text-[rgb(var(--color-text-secondary))] ${language === 'bn' ? 'font-bangla' : ''}`}>
                   {t(
                     'তথ্যে ভুল থাকলে ড্যাশবোর্ড থেকে সংশোধন করুন',
