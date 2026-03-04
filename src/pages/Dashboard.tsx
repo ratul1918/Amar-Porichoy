@@ -1,23 +1,25 @@
-import { Shield, User, MapPin, Calendar, CheckCircle2, AlertCircle, FileText, ArrowRight, Edit2, Lock, Phone, Mail } from 'lucide-react';
+import { Shield, User, MapPin, Calendar, CheckCircle2, AlertCircle, FileText, ArrowRight, Edit2, Lock, Phone, Mail, Wallet, Bell, QrCode, Eye } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 
 export function Dashboard() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
 
-  // Mock verified identity data
+  // Use actual user data from auth context
   const identityData = {
-    nameBn: 'মোহাম্মদ রহিম উদ্দিন',
-    nameEn: 'Mohammad Rahim Uddin',
-    nid: '১২৩৪৫৬৭৮৯০',
+    nameBn: user?.nameBn || 'ব্যবহারকারী',
+    nameEn: user?.name || 'User',
+    nid: user?.nid || '১২৩৪৫৬৭৮৯০',
     birthDate: '০১ জানুয়ারি, ১৯৯০',
     birthDateEn: 'January 1, 1990',
     addressBn: 'বাড়ি: ২৫, সড়ক: ৭, ধানমন্ডি, ঢাকা-১২০৫',
     addressEn: 'House: 25, Road: 7, Dhanmondi, Dhaka-1205',
-    phone: '০১৭১২-৩৪৫৬৭৮',
-    email: 'rahim.uddin@example.com',
-    photo: 'https://ui-avatars.com/api/?name=Mohammad+Rahim&background=0f4c75&color=fff&size=200'
+    phone: user?.phone || '০১৭১২-৩৪৫৬৭৮',
+    email: user?.email || 'user@example.com',
+    photo: user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=0f4c75&color=fff&size=200`
   };
 
   const verifiedFields = [
@@ -101,6 +103,51 @@ export function Dashboard() {
           </p>
         </motion.div>
 
+        {/* New Features Quick Access */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4"
+        >
+          <Link to="/digital-id">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white hover:scale-105 transition-transform cursor-pointer">
+              <QrCode className="w-8 h-8 mb-2" />
+              <h4 className={`text-sm font-medium ${language === 'bn' ? 'font-bangla' : ''}`}>
+                {t('ডিজিটাল আইডি', 'Digital ID')}
+              </h4>
+            </div>
+          </Link>
+
+          <Link to="/document-wallet">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white hover:scale-105 transition-transform cursor-pointer">
+              <Wallet className="w-8 h-8 mb-2" />
+              <h4 className={`text-sm font-medium ${language === 'bn' ? 'font-bangla' : ''}`}>
+                {t('ডকুমেন্ট ওয়ালেট', 'Document Wallet')}
+              </h4>
+            </div>
+          </Link>
+
+          <Link to="/notifications">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white hover:scale-105 transition-transform cursor-pointer relative">
+              <Bell className="w-8 h-8 mb-2" />
+              <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              <h4 className={`text-sm font-medium ${language === 'bn' ? 'font-bangla' : ''}`}>
+                {t('বিজ্ঞপ্তি', 'Notifications')}
+              </h4>
+            </div>
+          </Link>
+
+          <Link to="/verify-identity">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 text-white hover:scale-105 transition-transform cursor-pointer">
+              <Eye className="w-8 h-8 mb-2" />
+              <h4 className={`text-sm font-medium ${language === 'bn' ? 'font-bangla' : ''}`}>
+                {t('পরিচয় যাচাই', 'Verify Identity')}
+              </h4>
+            </div>
+          </Link>
+        </motion.div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Identity Card */}
           <div className="lg:col-span-1">
@@ -108,7 +155,7 @@ export function Dashboard() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-linear-to-br from-[rgb(var(--color-primary))] to-slate-700 rounded-3xl p-8 text-white sticky top-24"
+              className="bg-gradient-to-br from-[rgb(var(--color-primary))] to-slate-700 rounded-3xl p-8 text-white sticky top-24"
               style={{ boxShadow: 'var(--shadow-xl)' }}
             >
               {/* Verified Badge */}
@@ -189,7 +236,7 @@ export function Dashboard() {
                       index !== verifiedFields.length - 1 ? 'border-b border-gray-100' : ''
                     }`}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-100 to-teal-100 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center flex-shrink-0">
                       <field.icon className="w-6 h-6 text-[rgb(var(--color-primary))]" />
                     </div>
                     <div className="flex-1">
@@ -222,7 +269,7 @@ export function Dashboard() {
 
               <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-100">
                 <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                  <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className={`text-sm text-blue-900 ${language === 'bn' ? 'font-bangla' : ''}`}>
                       {t(
@@ -249,7 +296,7 @@ export function Dashboard() {
                   <Link key={index} to={action.link}>
                     <motion.div
                       whileHover={{ y: -4, scale: 1.02 }}
-                      className={`p-6 rounded-2xl bg-linear-to-br ${action.gradient} text-white cursor-pointer`}
+                      className={`p-6 rounded-2xl bg-gradient-to-br ${action.gradient} text-white cursor-pointer`}
                       style={{ boxShadow: 'var(--shadow-lg)' }}
                     >
                       <action.icon className="w-10 h-10 mb-4" />
@@ -301,7 +348,7 @@ export function Dashboard() {
                           <h4 className={`text-lg font-semibold ${language === 'bn' ? 'font-bangla' : ''}`}>
                             {t(app.serviceBn, app.serviceEn)}
                           </h4>
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white bg-linear-to-r ${getStatusColor(app.status)}`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${getStatusColor(app.status)}`}>
                             {t(app.statusBn, app.statusEn)}
                           </span>
                         </div>
