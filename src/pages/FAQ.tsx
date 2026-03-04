@@ -123,7 +123,7 @@ export function FAQ() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[rgb(var(--color-primary))] via-emerald-700 to-teal-600 py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[rgb(var(--color-secondary))] rounded-full blur-3xl"></div>
@@ -157,7 +157,7 @@ export function FAQ() {
       </div>
 
       {/* FAQ Categories */}
-      <div className="py-20 bg-linear-to-br from-gray-50 via-white to-emerald-50">
+      <div className="py-20 bg-gradient-to-br from-gray-50 via-white to-emerald-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-12">
             {categories.map((category, categoryIndex) => (
@@ -170,7 +170,7 @@ export function FAQ() {
               >
                 {/* Category Header */}
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${category.color} flex items-center justify-center`}>
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center`}>
                     <category.icon className="w-7 h-7 text-white" />
                   </div>
                   <h2 className={`text-3xl ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -204,7 +204,7 @@ export function FAQ() {
                           <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
-                            className="shrink-0"
+                            className="flex-shrink-0"
                           >
                             <ChevronDown className="w-5 h-5 text-[rgb(var(--color-text-secondary))]" />
                           </motion.div>
@@ -242,7 +242,7 @@ export function FAQ() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-linear-to-br from-[rgb(var(--color-primary))] to-emerald-600 rounded-3xl p-8 sm:p-12 text-center text-white"
+            className="bg-gradient-to-br from-[rgb(var(--color-primary))] to-emerald-600 rounded-3xl p-8 sm:p-12 text-center text-white"
             style={{ boxShadow: 'var(--shadow-xl)' }}
           >
             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6">
