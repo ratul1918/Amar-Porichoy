@@ -101,9 +101,9 @@ export function GoingAbroad() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -168,7 +168,7 @@ export function GoingAbroad() {
               >
                 {purpose.link ? (
                   <Link to={purpose.link}>
-                    <div className={`relative h-full p-6 rounded-2xl bg-linear-to-br ${purpose.gradient} text-white cursor-pointer`}
+                    <div className={`relative h-full p-6 rounded-2xl bg-gradient-to-br ${purpose.gradient} text-white cursor-pointer`}
                       style={{ boxShadow: 'var(--shadow-lg)' }}
                     >
                       <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4">
@@ -185,7 +185,7 @@ export function GoingAbroad() {
                 ) : (
                   <button
                     onClick={() => setSelectedPurpose(purpose.id)}
-                    className={`relative h-full w-full p-6 rounded-2xl bg-linear-to-br ${purpose.gradient} text-white transition-all ${
+                    className={`relative h-full w-full p-6 rounded-2xl bg-gradient-to-br ${purpose.gradient} text-white transition-all ${
                       selectedPurpose === purpose.id ? 'ring-4 ring-white ring-opacity-50' : ''
                     }`}
                     style={{ boxShadow: 'var(--shadow-lg)' }}
@@ -233,9 +233,9 @@ export function GoingAbroad() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-4 p-6 rounded-2xl bg-linear-to-br from-gray-50 to-white border-2 border-gray-100 hover:border-[rgb(var(--color-accent))] transition-all"
+                      className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 hover:border-[rgb(var(--color-accent))] transition-all"
                     >
-                      <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${getStatusColor(doc.status)} flex items-center justify-center shrink-0`}>
+                      <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getStatusColor(doc.status)} flex items-center justify-center flex-shrink-0`}>
                         <StatusIcon className="w-8 h-8 text-white" />
                       </div>
                       <div className="flex-1">
@@ -246,7 +246,7 @@ export function GoingAbroad() {
                           {t(doc.validityBn, doc.validityEn)}
                         </p>
                       </div>
-                      <div className={`px-4 py-2 rounded-full text-sm font-semibold bg-linear-to-r ${getStatusColor(doc.status)} text-white ${language === 'bn' ? 'font-bangla' : ''}`}>
+                      <div className={`px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r ${getStatusColor(doc.status)} text-white ${language === 'bn' ? 'font-bangla' : ''}`}>
                         {t(statusText.bn, statusText.en)}
                       </div>
                     </motion.div>
@@ -254,9 +254,9 @@ export function GoingAbroad() {
                 })}
               </div>
 
-              <div className="mt-8 p-6 rounded-2xl bg-linear-to-r from-blue-50 to-indigo-50 border-2 border-blue-100">
+              <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-100">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
                     <AlertCircle className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -288,7 +288,7 @@ export function GoingAbroad() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`px-10 py-5 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-semibold inline-flex items-center gap-3 ${language === 'bn' ? 'font-bangla' : ''}`}
+                    className={`px-10 py-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-semibold inline-flex items-center gap-3 ${language === 'bn' ? 'font-bangla' : ''}`}
                     style={{ boxShadow: 'var(--shadow-xl)' }}
                   >
                     {t('প্রয়োজনীয় সেবার জন্য আবেদন করুন', 'Apply for Required Services')}
