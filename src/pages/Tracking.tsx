@@ -170,7 +170,7 @@ export function Tracking() {
                           )}
 
                           {/* Icon */}
-                          <div className="relative z-10 shrink-0">
+                          <div className="relative z-10 flex-shrink-0">
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
@@ -225,7 +225,7 @@ export function Tracking() {
                 {app.status === 'rejected' && app.rejectionReason && (
                   <div className="mt-6 p-4 rounded-xl bg-[rgb(var(--color-error-bg))] border border-[rgb(var(--color-error))]">
                     <div className="flex gap-3">
-                      <AlertCircle className="w-5 h-5 text-[rgb(var(--color-error))] shrink-0" />
+                      <AlertCircle className="w-5 h-5 text-[rgb(var(--color-error))] flex-shrink-0" />
                       <div>
                         <h4 className={`text-sm mb-1 ${language === 'bn' ? 'font-bangla' : ''}`}>
                           {t('বাতিলের কারণ', 'Rejection Reason')}
@@ -242,7 +242,7 @@ export function Tracking() {
                 {app.status === 'completed' && (
                   <div className="mt-6 p-4 rounded-xl bg-[rgb(var(--color-verified-bg))] border border-[rgb(var(--color-verified))]">
                     <div className="flex items-start gap-3">
-                      <FileCheck className="w-5 h-5 text-[rgb(var(--color-verified))] shrink-0 mt-0.5" />
+                      <FileCheck className="w-5 h-5 text-[rgb(var(--color-verified))] flex-shrink-0 mt-0.5" />
                       <div>
                         <h4 className={`text-sm mb-1 ${language === 'bn' ? 'font-bangla' : ''}`}>
                           {t('আবেদন সফল', 'Application Successful')}
@@ -280,7 +280,7 @@ export function Tracking() {
             )}
           </p>
           <div className="flex gap-3">
-            <Truck className="w-5 h-5 text-[rgb(var(--color-accent))] shrink-0" />
+            <Truck className="w-5 h-5 text-[rgb(var(--color-accent))] flex-shrink-0" />
             <p className={`text-sm text-[rgb(var(--color-text-secondary))] ${language === 'bn' ? 'font-bangla' : ''}`}>
               {t(
                 'সাধারণত আবেদন প্রক্রিয়া ৭-১৫ কার্যদিবস সময় নেয়',
