@@ -57,7 +57,7 @@ export function Landing() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-[rgb(var(--color-primary))] via-slate-700 to-slate-600 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[rgb(var(--color-primary))] via-slate-700 to-slate-600 overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -181,7 +181,7 @@ export function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className={`text-3xl sm:text-4xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
+            <h2 className={`text-3xl sm:text-4xl mb-4 text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
               {t('কেন পরিচয় ব্যবহার করবেন?', 'Why Use Porichoy?')}
             </h2>
             <p className={`text-lg text-[rgb(var(--color-text-secondary))] max-w-2xl mx-auto ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -197,13 +197,13 @@ export function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-8 text-center hover:shadow-lg transition-all duration-300"
+                className="bg-[rgb(var(--color-surface))] rounded-2xl p-8 text-center hover:shadow-lg transition-all duration-300"
                 style={{ boxShadow: 'var(--shadow-md)' }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center mx-auto mb-6">
                   <benefit.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className={`text-xl mb-3 ${language === 'bn' ? 'font-bangla' : ''}`}>
+                <h3 className={`text-xl mb-3 text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
                   {t(benefit.titleBn, benefit.titleEn)}
                 </h3>
                 <p className={`text-[rgb(var(--color-text-secondary))] ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -216,7 +216,7 @@ export function Landing() {
       </div>
 
       {/* Services Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-[rgb(var(--color-surface))]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -224,7 +224,7 @@ export function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className={`text-3xl sm:text-4xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
+            <h2 className={`text-3xl sm:text-4xl mb-4 text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
               {t('সব সরকারি সেবা এক জায়গায়', 'All Government Services in One Place')}
             </h2>
             <p className={`text-lg text-[rgb(var(--color-text-secondary))] max-w-2xl mx-auto ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -241,13 +241,13 @@ export function Landing() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ y: -4 }}
-                className="bg-linear-to-br from-gray-50 to-white rounded-xl p-6 text-center border border-gray-100 hover:border-[rgb(var(--color-accent))] transition-all"
+                className="bg-[rgb(var(--color-bg))] rounded-xl p-6 text-center border border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-accent))] transition-all"
                 style={{ boxShadow: 'var(--shadow-sm)' }}
               >
-                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center mx-auto mb-3">
                   <FileText className="w-6 h-6 text-white" />
                 </div>
-                <p className={`text-sm font-medium ${language === 'bn' ? 'font-bangla' : ''}`}>
+                <p className={`text-sm font-medium text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
                   {t(service.nameBn, service.nameEn)}
                 </p>
               </motion.div>
@@ -259,7 +259,7 @@ export function Landing() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-8 py-4 rounded-xl bg-linear-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white font-semibold inline-flex items-center gap-2 ${language === 'bn' ? 'font-bangla' : ''}`}
+                className={`px-8 py-4 rounded-xl bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white font-semibold inline-flex items-center gap-2 ${language === 'bn' ? 'font-bangla' : ''}`}
                 style={{ boxShadow: 'var(--shadow-lg)' }}
               >
                 {t('সব সেবা দেখুন', 'View All Services')}
@@ -271,7 +271,7 @@ export function Landing() {
       </div>
 
       {/* How It Works Preview */}
-      <div className="py-20 bg-linear-to-br from-gray-50 via-white to-blue-50">
+      <div className="py-20 bg-[rgb(var(--color-bg))]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -279,7 +279,7 @@ export function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className={`text-3xl sm:text-4xl mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
+            <h2 className={`text-3xl sm:text-4xl mb-4 text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
               {t('মাত্র ৩টি ধাপে শুরু করুন', 'Get Started in Just 3 Steps')}
             </h2>
           </motion.div>
@@ -298,14 +298,14 @@ export function Landing() {
                 transition={{ delay: index * 0.15 }}
                 className="relative"
               >
-                <div className="bg-white rounded-2xl p-8 text-center" style={{ boxShadow: 'var(--shadow-lg)' }}>
-                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-linear-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center text-white text-xl font-bold">
+                <div className="bg-[rgb(var(--color-surface))] rounded-2xl p-8 text-center" style={{ boxShadow: 'var(--shadow-lg)' }}>
+                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center text-white text-xl font-bold">
                     {language === 'bn' ? ['১', '২', '৩'][index] : index + 1}
                   </div>
-                  <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-100 to-teal-100 flex items-center justify-center mx-auto mb-4 mt-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[rgb(var(--color-accent-light))] to-[rgb(var(--color-accent-light))] flex items-center justify-center mx-auto mb-4 mt-4">
                     <step.icon className="w-8 h-8 text-[rgb(var(--color-primary))]" />
                   </div>
-                  <h3 className={`text-xl mb-3 ${language === 'bn' ? 'font-bangla' : ''}`}>
+                  <h3 className={`text-xl mb-3 text-[rgb(var(--color-text))] ${language === 'bn' ? 'font-bangla' : ''}`}>
                     {t(step.titleBn, step.titleEn)}
                   </h3>
                   <p className={`text-[rgb(var(--color-text-secondary))] ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -319,7 +319,7 @@ export function Landing() {
       </div>
 
       {/* Final CTA */}
-      <div className="py-20 bg-linear-to-r from-[rgb(var(--color-primary))] to-slate-700">
+      <div className="py-20 bg-gradient-to-r from-[rgb(var(--color-primary))] to-slate-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
