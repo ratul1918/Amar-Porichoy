@@ -129,9 +129,9 @@ export function HajjUmrah() {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-amber-50 via-white to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
       {/* Hero Section with Respectful Design */}
-      <div className="relative bg-linear-to-br from-amber-600 via-orange-600 to-yellow-600 py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-amber-600 via-orange-600 to-yellow-600 py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -182,7 +182,7 @@ export function HajjUmrah() {
                   alt="Kaaba Mecca"
                   className="w-full h-auto"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-amber-900 to-transparent opacity-40"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-amber-900 to-transparent opacity-40"></div>
               </div>
             </motion.div>
           </div>
@@ -205,7 +205,7 @@ export function HajjUmrah() {
                   onClick={() => setSelectedJourney(journey.id)}
                   className={`p-8 rounded-2xl border-3 transition-all ${
                     selectedJourney === journey.id
-                      ? 'bg-linear-to-br from-amber-500 to-orange-500 text-white border-amber-600'
+                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white border-amber-600'
                       : 'bg-white border-gray-200 hover:border-amber-300'
                   }`}
                   style={{ boxShadow: selectedJourney === journey.id ? 'var(--shadow-xl)' : 'var(--shadow-md)' }}
@@ -255,7 +255,7 @@ export function HajjUmrah() {
                   className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-amber-300 transition-all"
                   style={{ boxShadow: 'var(--shadow-md)' }}
                 >
-                  <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${getStatusColor(step.status)} flex items-center justify-center mb-4`}>
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getStatusColor(step.status)} flex items-center justify-center mb-4`}>
                     <step.icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className={`text-xl mb-2 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -264,7 +264,7 @@ export function HajjUmrah() {
                   <p className={`text-[rgb(var(--color-text-secondary))] mb-4 ${language === 'bn' ? 'font-bangla' : ''}`}>
                     {t(step.descBn, step.descEn)}
                   </p>
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-linear-to-r ${getStatusColor(step.status)} text-white ${language === 'bn' ? 'font-bangla' : ''}`}>
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r ${getStatusColor(step.status)} text-white ${language === 'bn' ? 'font-bangla' : ''}`}>
                     <StatusIcon className="w-4 h-4" />
                     {t(step.statusBn, step.statusEn)}
                   </div>
@@ -292,7 +292,7 @@ export function HajjUmrah() {
             </p>
           </motion.div>
 
-          <div className="bg-linear-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-12 border-2 border-amber-100"
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-12 border-2 border-amber-100"
             style={{ boxShadow: 'var(--shadow-xl)' }}
           >
             <div className="space-y-4">
@@ -308,7 +308,7 @@ export function HajjUmrah() {
                     className="flex items-center gap-4 p-6 rounded-2xl bg-white"
                     style={{ boxShadow: 'var(--shadow-sm)' }}
                   >
-                    <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${getStatusColor(doc.status)} flex items-center justify-center shrink-0`}>
+                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getStatusColor(doc.status)} flex items-center justify-center flex-shrink-0`}>
                       <StatusIcon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
@@ -355,7 +355,7 @@ export function HajjUmrah() {
                 className="bg-white rounded-2xl p-8 text-center border-2 border-gray-100 hover:border-amber-300 transition-all"
                 style={{ boxShadow: 'var(--shadow-md)' }}
               >
-                <div className="w-16 h-16 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6">
                   <option.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className={`text-2xl mb-3 ${language === 'bn' ? 'font-bangla' : ''}`}>
@@ -371,7 +371,7 @@ export function HajjUmrah() {
       </div>
 
       {/* Reassuring Message */}
-      <div className="py-20 bg-linear-to-r from-amber-600 to-orange-600">
+      <div className="py-20 bg-gradient-to-r from-amber-600 to-orange-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
