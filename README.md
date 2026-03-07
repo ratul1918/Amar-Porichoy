@@ -14,7 +14,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.3.5-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![License](https://img.shields.io/badge/License-Private-red?style=flat-square)](./LICENSE)
-
+ 
 [বাংলা](#বাংলা-ভাষায়-বর্ণনা) | [English](#english-description)
 
 </div>
