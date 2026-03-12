@@ -6,7 +6,7 @@ function walk(dir) {
     let list = fs.readdirSync(dir);
     list.forEach(function (file) {
         file = dir + '/' + file;
-        let stat = fs.statSync(file);
+        let stat = fs.statSync(file); 
         if (stat && stat.isDirectory()) {
             if (!file.includes('supabase/functions')) {
                 results = results.concat(walk(file));
