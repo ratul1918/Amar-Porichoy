@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Lock, CheckCircle2, Edit3, AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
- 
+
 export function ApplicationForm() {
   const { serviceId } = useParams(); 
   const navigate = useNavigate();
