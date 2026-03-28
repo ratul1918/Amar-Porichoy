@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
 
 export function ApplicationForm() {
-  const { serviceId } = useParams();
+  const { serviceId } = useParams(); 
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [submitted, setSubmitted] = useState(false);
