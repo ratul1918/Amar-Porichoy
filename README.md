@@ -6,7 +6,7 @@
 
 **🇧🇩 Bangladesh's National Digital Identity Platform**
 
-*One Identity. Every Government Service.*
+*One Identity. Every Government Service.* 
 
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square)](./package.json)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square)]()
